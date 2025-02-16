@@ -104,12 +104,12 @@ kafka-python-ng
 
 # SQLAlchemy - SQL toolkit and Object-Relational Mapping (ORM) library
 # Uncomment the line below to install SQLAlchemy.
-# SQLAlchemy
+SQLAlchemy
 
 # psycopg2 - PostgreSQL database adapter for Python
 # Uncomment the line below to install psycopg2.
-# psycopg2
+ psycopg2
 
 # PyMySQL - MySQL client library
 # Uncomment the line below to install PyMySQL.
-# PyMySQL
+PyMySQL
