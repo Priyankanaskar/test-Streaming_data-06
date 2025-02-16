@@ -1,5 +1,5 @@
 """
-consumer_mee.py
+consumer_priyanka.py
 
 Consume json messages from a live data file. 
 Insert the processed messages into a database.
