@@ -99,6 +99,8 @@ Windows:
 py -m consumers.kafka_consumer_case
 OR
 py -m consumers.file_consumer_case
+OR 
+py -m consumers.consumer_pri
 ```
 
 Mac/Linux:
