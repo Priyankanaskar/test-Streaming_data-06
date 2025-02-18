@@ -114,3 +114,4 @@ SQLAlchemy
 # PyMySQL - MySQL client library
 # Uncomment the line below to install PyMySQL.
 PyMySQL
+faker

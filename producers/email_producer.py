@@ -1,8 +1,8 @@
 import json
 import time
 import random
-from kafka import KafkaProducer
-from faker import Faker
+
+
 from utils.utils_config import get_kafka_broker_address
 from utils.utils_logger import logger
 

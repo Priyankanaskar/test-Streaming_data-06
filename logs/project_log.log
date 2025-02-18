@@ -6761,3 +6761,17 @@
 2025-02-16 00:10:54.469 | INFO     | __main__:main:182 - STEP 4a Wrote message to file: {'message': 'I just shared game! It was boring.', 'author': 'Charlie', 'timestamp': '2025-02-16 00:10:54', 'category': 'gaming', 'sentiment': 0.37, 'keyword_mentioned': 'game', 'message_length': 34}
 2025-02-16 00:10:54.474 | INFO     | __main__:main:187 - STEP 4b Sent message to Kafka topic 'buzzline': {'message': 'I just shared game! It was boring.', 'author': 'Charlie', 'timestamp': '2025-02-16 00:10:54', 'category': 'gaming', 'sentiment': 0.37, 'keyword_mentioned': 'game', 'message_length': 34}
 2025-02-16 00:10:54.870 | INFO     | __main__:main:101 - Successfully plotted keyword charts
+2025-02-18 00:27:05.832 | INFO     | utils.utils_logger:<module>:43 - Logging to file: logs\project_log.log
+2025-02-18 00:27:05.833 | INFO     | utils.utils_config:get_kafka_broker_address:51 - KAFKA_BROKER_ADDRESS: Localhost:9092
+2025-02-18 00:27:05.998 | INFO     | __main__:process_email_messages:22 - Starting Email Consumer...
+2025-02-18 00:28:04.815 | INFO     | utils.utils_logger:<module>:43 - Logging to file: logs\project_log.log
+2025-02-18 00:28:04.816 | INFO     | utils.utils_config:get_kafka_broker_address:51 - KAFKA_BROKER_ADDRESS: Localhost:9092
+2025-02-18 00:28:04.932 | INFO     | __main__:process_email_messages:22 - Starting Email Consumer...
+2025-02-18 00:30:36.208 | INFO     | __main__:process_email_messages:30 - Stopping Email Consumer...
+2025-02-18 00:39:41.839 | INFO     | utils.utils_logger:<module>:43 - Logging to file: logs\project_log.log
+2025-02-18 00:39:41.839 | INFO     | utils.utils_config:get_kafka_broker_address:51 - KAFKA_BROKER_ADDRESS: Localhost:9092
+2025-02-18 00:39:41.953 | INFO     | __main__:process_email_messages:22 - Starting Email Consumer...
+2025-02-18 00:40:21.178 | INFO     | utils.utils_logger:<module>:43 - Logging to file: logs\project_log.log
+2025-02-18 00:47:43.283 | INFO     | utils.utils_logger:<module>:43 - Logging to file: logs\project_log.log
+2025-02-18 00:47:43.284 | INFO     | utils.utils_config:get_kafka_broker_address:51 - KAFKA_BROKER_ADDRESS: Localhost:9092
+2025-02-18 00:47:43.400 | INFO     | __main__:process_email_messages:22 - Starting Email Consumer...
