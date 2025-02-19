@@ -1,49 +1,31 @@
+from kafka import KafkaProducer
+from faker import Faker
 import json
 import time
-import random
 
-
-from utils.utils_config import get_kafka_broker_address
-from utils.utils_logger import logger
-
-# Initialize Faker for generating fake email data
+# Initialize Faker
 fake = Faker()
 
-def create_kafka_producer():
-    """Create a Kafka producer with JSON serializer."""
-    kafka_broker = get_kafka_broker_address()
-    
-    producer = KafkaProducer(
-        bootstrap_servers=kafka_broker,
-        value_serializer=lambda v: json.dumps(v).encode("utf-8")
-    )
-    return producer
+# Kafka Producer Setup
+producer = KafkaProducer(
+    bootstrap_servers="localhost:9092",
+    value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+)
 
-def generate_fake_email():
-    """Generate a fake email message."""
+# Function to generate a fake email event
+def generate_email():
     return {
+        "timestamp": time.time(),
         "sender": fake.email(),
         "recipient": fake.email(),
         "subject": fake.sentence(),
-        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "body": fake.paragraph(),
     }
 
-def send_email_messages():
-    """Send fake email messages to Kafka."""
-    producer = create_kafka_producer()
-    topic = "email_stream"
-
-    logger.info("Starting Email Producer...")
-    try:
-        while True:
-            email_data = generate_fake_email()
-            producer.send(topic, email_data)
-            logger.info(f"Sent: {email_data}")
-            time.sleep(random.randint(1, 3))  # Simulate email arrival
-    except KeyboardInterrupt:
-        logger.info("Stopping Email Producer...")
-    finally:
-        producer.close()
-
+# Sending email events to Kafka
 if __name__ == "__main__":
-    send_email_messages()
+    while True:
+        email_data = generate_email()
+        producer.send("email_stream", email_data)
+        print(f"Produced: {email_data}")
+        time.sleep(2)  # Simulate real-time streaming
