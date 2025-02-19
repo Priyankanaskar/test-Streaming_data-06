@@ -1,208 +1,76 @@
-# buzzline-05-Priyanka
+# # buzzline-06-kersha
+Simulated Online Sales &amp; E-commerce Streaming Data Project
 
-Nearly every streaming analytics system stores processed data somewhere for further analysis, historical reference, or integration with BI tools.
+📈 **Author:** Priyanka 
+📅 **Date:** February 18, 2025  
+📊 **License:** MIT License
 
-In this example project, we incorporate a relational data store. 
-We use SQLite, but the example could be altered to work with MySQL, PostgreSQL, or MongoDB.
+#  Real-time Sales Analytics with Python & SQLite
 
-## VS Code Extensions
+## 📂 Repository Overview
+This repository contains a real-time **sales transaction streaming project**, where a **Python producer** generates fake sales transactions and stores them in an **SQLite database**. A **consumer script** reads from the database and generates visual insights, including a **heatmap, bar chart, and pie chart**.
 
-- Black Formatter by Microsoft
-- Markdown All in One by Yu Zhang
-- PowerShell by Microsoft (on Windows Machines)
-- Pylance by Microsoft
-- Python by Microsoft
-- Python Debugger by Microsoft
-- Ruff by Astral Software (Linter)
-- **SQLite Viewer by Florian Klampfer**
-- WSL by Microsoft (on Windows Machines)
-
-## Task 1. Use Tools from Module 1 and 2
-
-Before starting, ensure you have completed the setup tasks in <https://github.com/denisecase/buzzline-01-case> and <https://github.com/denisecase/buzzline-02-case> first. 
-
-Versions matter. Python 3.11 is required. See the instructions for the required Java JDK and more. 
-
-## Task 2. Copy This Example Project and Rename
-
-Once the tools are installed, copy/fork this project into your GitHub account
-and create your own version of this project to run and experiment with. 
-Follow the instructions in [FORK-THIS-REPO.md](https://github.com/denisecase/buzzline-01-case/docs/FORK-THIS-REPO.md).
-
-OR: For more practice, add these example scripts or features to your earlier project. 
-You'll want to check requirements.txt, .env, and the consumers, producers, and util folders. 
-Use your README.md to record your workflow and commands. 
-    
-
-## Task 3. Manage Local Project Virtual Environment
-
-Follow the instructions in [MANAGE-VENV.md](https://github.com/denisecase/buzzline-01-case/docs/MANAGE-VENV.md) to:
-1. Create your .venv
-2. Activate .venv
-3. Install the required dependencies using requirements.txt.
-
-## Task 4. Start Zookeeper and Kafka (Takes 2 Terminals)
-
-If Zookeeper and Kafka are not already running, you'll need to restart them.
-See instructions at [SETUP-KAFKA.md] to:
-
-1. Start Zookeeper Service ([link](https://github.com/denisecase/buzzline-02-case/blob/main/docs/SETUP-KAFKA.md#step-7-start-zookeeper-service-terminal-1))
-2. Start Kafka Service ([link](https://github.com/denisecase/buzzline-02-case/blob/main/docs/SETUP-KAFKA.md#step-8-start-kafka-terminal-2))
+###  **Key Features:**
+- **Simulated E-commerce Sales Data**: Generates realistic transactions with timestamps, product categories, regions, and purchase amounts.
+- **SQLite Database Integration**: Stores transactions in a structured relational database.
+- **Real-time Data Processing**: The consumer script fetches, aggregates, and visualizes sales trends.
+- **Multiple Visualizations**:
+  - **Heatmap:** Sales by product category
+  - **Bar Chart:** Sales count by category
+  - **Pie Chart:** Sales distribution
 
 ---
+## 🚀 **Project Setup**
+### **1️. Create and Activate Virtual Environment**
+Before running the scripts, set up a virtual environment:
+```powershell
+# Create virtual environment
+python -m venv venv
 
-## Task 5. Start a New Streaming Application
+# Activate virtual environment (Windows)
+venv\Scripts\activate
 
-This will take two more terminals:
-
-1. One to run the producer which writes messages. 
-2. Another to run the consumer which reads messages, processes them, and writes them to a data store. 
-
-### Producer (Terminal 3) 
-
-Start the producer to generate the messages. 
-The existing producer writes messages to a live data file in the data folder.
-If Zookeeper and Kafka services are running, it will try to write them to a Kafka topic as well.
-For configuration details, see the .env file. 
-
-In VS Code, open a NEW terminal.
-Use the commands below to activate .venv, and start the producer. 
-
-Windows:
-
-```shell
-.venv\Scripts\activate
-py -m producers.producer_case
+# Activate virtual environment (Mac/Linux)
+source venv/bin/activate
 ```
 
-Mac/Linux:
-```zsh
-source .venv/bin/activate
-python3 -m producers.producer_case
+### **2️. Install Required Dependencies**
+Ensure all necessary libraries are installed:
+```powershell
+pip install pandas matplotlib seaborn
 ```
-
-The producer will still work if Kafka is not available.
-
-### Consumer (Terminal 4) - Two Options
-
-Start an associated consumer. 
-You have two options. 
-1. Start the consumer that reads from the live data file.
-2. OR Start the consumer that reads from the Kafka topic.
-
-In VS Code, open a NEW terminal in your root project folder. 
-Use the commands below to activate .venv, and start the consumer. 
-
-Windows:
-```shell
-.venv\Scripts\activate
-py -m consumers.kafka_consumer_case
-OR
-py -m consumers.file_consumer_case
-OR 
-py -m consumers.consumer_pri
+---
+##  **How to Run the Scripts**
+### **1️. Start the Sales Producer**
+Run the producer to continuously generate sales transactions and insert them into SQLite:
+```powershell
+python python_producers/sales_producer.py
 ```
+This script:
+- Generates a **new sales transaction every 2 seconds**.
+- Stores transactions in the **sales_data.sqlite** database.
 
-Mac/Linux:
-```zsh
-source .venv/bin/activate
-python3 -m consumers.kafka_consumer_case
-OR
-python3 -m consumers.file_consumer_case
-python3 -m consumers.consumer_pri
+### **2️. Start the Sales Consumer**
+Run the consumer to fetch transactions and generate visualizations:
+```powershell
+python python_consumers/sales_consumer.py
 ```
-
---Project summery --
- consumer_pri.py (Custom Kafka Consumer)
-Our custom Kafka consumer is designed to consume, process, and visualize live streaming messages from a Kafka topic. It fetches structured JSON messages, extracts relevant fields (e.g., timestamp, keyword_mentioned), and inserts the processed data into an SQLite database (streamed_messages table). Additionally, the consumer generates real-time visual analytics using matplotlib, including:
-
-Cumulative Keyword Mentions Over Time – Tracks keyword trends dynamically.
-Keyword Frequency Bar Chart – Shows the most frequently mentioned keywords.
-Message Timestamp Distribution – Displays when messages are received.
-This consumer integrates with database functions from db_sqlite_case.py and environment configurations from utils/utils_config. It ensures smooth data ingestion, storage, and visualization for real-time insights. 
-
-
-
-## Review the Project Code
-
-Review the requirements.txt file. 
-- What - if any - new requirements do we need for this project?
-- Note that requirements.txt now lists both kafka-python and six. 
-- What are some common dependencies as we incorporate data stores into our streaming pipelines?
-
--I install few requrements.txt as they were necessory for my project .
--If few requirements.txt missing we need to add as pip or ipmort them .
-
-Review the .env file with the environment variables.
-- Why is it helpful to put some settings in a text file?
-- As we add database access and passwords, we start to keep two versions: 
-   - .evn 
-   - .env.example
- - Read the notes in those files - which one is typically NOT added to source control?
- - How do we ignore a file so it doesn't get published in GitHub (hint: .gitignore)
-- 
- - add .venv  so it doesn't get published in GitHub 
-
-Review the .gitignore file.
-- What new entry has been added?
-  
- Environment variables file (which could contain sensitive information)
-.env 
-
-Review the code for the producer and the two consumers.
- - Understand how the information is generated by the producer.
- - Understand how the different consumers read, process, and store information in a data store? 
-
-Compare the consumer that reads from a live data file and the consumer that reads from a Kafka topic.
-- Which functions are the same for both?
-- Which parts are different?
-
-What files are in the utils folder? 
-- Why bother breaking functions out into utility modules?
-- Would similar streaming projects be likely to take advantage of any of these files?
-
-What files are in the producers folder?
-- How do these compare to earlier projects?
-- What has been changed?
-- What has stayed the same?
-
---In producers folder there are two files only which is need to run --consumer.py
-
-What files are in the consumers folder?
-- This is where the processing and storage takes place.
-- Why did we make a separate file for reading from the live data file vs reading from the Kafka file?
-- What functions are in each? 
-- Are any of the functions duplicated? 
-- Can you refactor the project so we could write a duplicated function just once and reuse it? 
-- What functions are in the sqlite script?
-- What functions might be needed to initialize a different kind of data store?
-- What functions might be needed to insert a message into a different kind of data store?
+This script:
+- Reads sales transactions from **SQLite**.
+- **Processes data** into structured insights.
+- **Displays 3 visualizations:**
+  1. **Heatmap** - Sales by product category
+  2. **Bar Chart** - Sales count per category
+  3. **Pie Chart** - Sales distribution per category
 
 ---
+##  **Sample Visualizations**
+Once the consumer script runs successfully, it will display **three charts**:
+1. **Heatmap:** Sales intensity by category (colored grid)
+2. **Bar Chart:** Number of transactions per category
+3. **Pie Chart:** Proportion of sales across categories
 
-## Explorations
+![alt text](<Screenshot 2025-02-17 112106 sales triple.png>)
 
-- Did you run the kafka consumer or the live file consumer? Why?
-- Can you use the examples to add a database to your own streaming applications? 
-- What parts are most interesting to you?
-- What parts are most challenging? 
 
----  Yes I run consumers or live file consumer to check and understand the process before created my own consumer.
 
-## Later Work Sessions
-When resuming work on this project:
-1. Open the folder in VS Code. 
-2. Open a terminal and start the Zookeeper service. If Windows, remember to start wsl. 
-3. Open a terminal and start the Kafka service. If Windows, remember to start wsl. 
-4. Open a terminal to start the producer. Remember to activate your local project virtual environment (.env).
-5. Open a terminal to start the consumer. Remember to activate your local project virtual environment (.env).
-
-## Save Space
-To save disk space, you can delete the .venv folder when not actively working on this project.
-You can always recreate it, activate it, and reinstall the necessary packages later. 
-Managing Python virtual environments is a valuable skill. 
-
-## License
-This project is licensed under the MIT License as an example project. 
-You are encouraged to fork, copy, explore, and modify the code as you like. 
-See the [LICENSE](LICENSE.txt) file for more.
