@@ -115,3 +115,4 @@ SQLAlchemy
 # Uncomment the line below to install PyMySQL.
 PyMySQL
 faker
+pandas
