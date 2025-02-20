@@ -52,7 +52,7 @@ def animate(i):
         return
 
     plt.clf()
-    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig, axes = plt.subplots(1, 3, figsize=(15, 6))
     fig.patch.set_facecolor('#f5f5f5')  # Set background color
     
     df_bar = df.groupby("product_category").size().reset_index(name="sales_count")
@@ -75,4 +75,4 @@ if __name__ == "__main__":
     ani = FuncAnimation(plt.gcf(), animate, interval=10000)
     while True:
         fetch_live_sales()
-        time.sleep(5)
+        time.sleep(15)
