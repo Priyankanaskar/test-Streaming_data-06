@@ -1,59 +1,65 @@
 import sqlite3
-import json
-from kafka import KafkaConsumer
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# Kafka Consumer Configuration
-consumer = KafkaConsumer(
-    'weather_data',
-    bootstrap_servers=['localhost:9092'],
-    group_id='weather-consumer-group',
-    value_deserializer=lambda x: json.loads(x.decode('utf-8'))
-)
+# Connect to SQLite database
+DB_NAME = "weather_data.db"
 
-# SQLite Database Configuration
-DB_NAME = 'weather_data.db'
-
-# Create SQLite Table
-def create_table():
+def fetch_weather_data():
+    """Fetches weather data from SQLite database."""
     conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS weather (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            latitude REAL,
-            longitude REAL,
-            temperature REAL,
-            windspeed REAL,
-            weather_code INTEGER,
-            timestamp TEXT
-        )
-    ''')
-    conn.commit()
+    query = "SELECT timestamp, temperature, windspeed, weather_code FROM weather ORDER BY timestamp ASC"
+    df = pd.read_sql_query(query, conn)
     conn.close()
+    return df
 
-# Insert Weather Data into SQLite
-def insert_weather_data(data):
-    try:
-        conn = sqlite3.connect(DB_NAME)
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO weather (latitude, longitude, temperature, windspeed, weather_code, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (data['latitude'], data['longitude'], data['temperature'], data['windspeed'], data['weather_code'], data['timestamp']))
-        conn.commit()
-        conn.close()
-        print(f"✅ Data stored successfully: {data}")
-    except Exception as e:
-        print(f"❌ Error inserting data: {e}")
+def plot_all_charts():
+    df = fetch_weather_data()
 
-# Consume Kafka Messages and Store in SQLite
-def consume_weather_data():
-    create_table()  # Ensure the correct table exists
-    print("✅ Waiting for weather data from Kafka...")
-    for message in consumer:
-        weather_data = message.value
-        print(f"📥 Received: {weather_data}")
-        insert_weather_data(weather_data)
+    if df.empty:
+        print("❌ No data found in database. Run the producer and consumer first.")
+        return
 
-if __name__ == '__main__':
-    consume_weather_data()
+    # Convert timestamp to readable format
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+    # Create a figure with a 2x2 grid
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+    # 🟢 **1️⃣ Line Chart: Temperature Trend Over Time**
+    axes[0, 0].plot(df["timestamp"], df["temperature"], marker="o", linestyle="-", color="blue", label="Temperature (°C)")
+    axes[0, 0].set_xlabel("Timestamp")
+    axes[0, 0].set_ylabel("Temperature (°C)")
+    axes[0, 0].set_title("📈 Temperature Trend Over Time")
+    axes[0, 0].tick_params(axis='x', rotation=45)
+    axes[0, 0].legend()
+    axes[0, 0].grid()
+
+    # 🟢 **2️⃣ Bar Chart: Wind Speed Comparison**
+    axes[0, 1].bar(df["timestamp"], df["windspeed"], color="green", label="Wind Speed (km/h)")
+    axes[0, 1].set_xlabel("Timestamp")
+    axes[0, 1].set_ylabel("Wind Speed (km/h)")
+    axes[0, 1].set_title("🌬️ Wind Speed Over Time")
+    axes[0, 1].tick_params(axis='x', rotation=45)
+    axes[0, 1].legend()
+    axes[0, 1].grid(axis="y")
+
+    # 🟢 **3️⃣ Pie Chart: Weather Code Distribution**
+    weather_counts = df["weather_code"].value_counts()
+    labels = [f"Code {code}" for code in weather_counts.index]
+    axes[1, 0].pie(weather_counts, labels=labels, autopct="%1.1f%%", colors=["red", "blue", "orange", "green"])
+    axes[1, 0].set_title("☁️ Weather Condition Distribution")
+
+    # 🟢 **4️⃣ Scatter Plot: Temperature vs. Wind Speed**
+    axes[1, 1].scatter(df["temperature"], df["windspeed"], c="purple", alpha=0.7)
+    axes[1, 1].set_xlabel("Temperature (°C)")
+    axes[1, 1].set_ylabel("Wind Speed (km/h)")
+    axes[1, 1].set_title("🔥 Temperature vs. Wind Speed")
+    axes[1, 1].grid()
+
+    # Adjust layout and show all charts in one view
+    plt.tight_layout()
+    plt.show()
+
+if __name__ == "__main__":
+    plot_all_charts()

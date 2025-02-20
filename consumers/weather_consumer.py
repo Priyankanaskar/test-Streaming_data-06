@@ -1,59 +1,85 @@
 import sqlite3
 import json
+import matplotlib.pyplot as plt
+import pandas as pd
 from kafka import KafkaConsumer
 
-# Kafka Consumer Configuration
-consumer = KafkaConsumer(
-    'weather_data',
-    bootstrap_servers=['localhost:9092'],
-    group_id='weather-consumer-group',
-    value_deserializer=lambda x: json.loads(x.decode('utf-8'))
-)
+# Kafka settings
+KAFKA_TOPIC = "weather_topic"
+KAFKA_SERVER = "localhost:9092"
 
-# SQLite Database Configuration
-DB_NAME = 'weather_data.db'
+# SQLite settings
+DB_NAME = "weather_data.db"
 
-# Create SQLite Table
-def create_table():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS weather (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            latitude REAL,
-            longitude REAL,
-            temperature REAL,
-            windspeed REAL,
-            weather_code INTEGER,
-            timestamp TEXT
-        )
-    ''')
-    conn.commit()
-    conn.close()
+# Connect to SQLite and create table if not exists
+conn = sqlite3.connect(DB_NAME)
+cursor = conn.cursor()
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS weather (
+        timestamp TEXT,
+        temperature REAL,
+        windspeed REAL,
+        weather_code INTEGER
+    )
+""")
+conn.commit()
 
-# Insert Weather Data into SQLite
-def insert_weather_data(data):
+# Kafka Consumer
+consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=KAFKA_SERVER, value_deserializer=lambda x: json.loads(x.decode("utf-8")))
+
+print("✅ Kafka Consumer Started. Listening for weather data...")
+
+for message in consumer:
+    data = message.value
+
+    timestamp = data.get("timestamp")
+    temperature = data.get("temperature")
+    windspeed = data.get("windspeed")
+    weather_code = data.get("weather_code")
+
+    # Store in SQLite
     try:
-        conn = sqlite3.connect(DB_NAME)
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO weather (latitude, longitude, temperature, windspeed, weather_code, timestamp)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (data['latitude'], data['longitude'], data['temperature'], data['windspeed'], data['weather_code'], data['timestamp']))
+        cursor.execute("INSERT INTO weather (timestamp, temperature, windspeed, weather_code) VALUES (?, ?, ?, ?)",
+                       (timestamp, temperature, windspeed, weather_code))
         conn.commit()
-        conn.close()
-        print(f"✅ Data stored successfully: {data}")
+        print(f"📩 Data Stored: {data}")
     except Exception as e:
         print(f"❌ Error inserting data: {e}")
 
-# Consume Kafka Messages and Store in SQLite
-def consume_weather_data():
-    create_table()  # Ensure the correct table exists
-    print("✅ Waiting for weather data from Kafka...")
-    for message in consumer:
-        weather_data = message.value
-        print(f"📥 Received: {weather_data}")
-        insert_weather_data(weather_data)
+    # Fetch latest data for visualization
+    df = pd.read_sql_query("SELECT * FROM weather ORDER BY timestamp ASC", conn)
 
-if __name__ == '__main__':
-    consume_weather_data()
+    if not df.empty:
+        df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+        # 🔹 **1️⃣ Line Chart - Temperature Over Time**
+        plt.figure(figsize=(12, 6))
+        plt.subplot(1, 3, 1)  # (rows, cols, position)
+        plt.plot(df["timestamp"], df["temperature"], marker="o", linestyle="-", color="blue")
+        plt.xlabel("Time")
+        plt.ylabel("Temperature (°C)")
+        plt.title("📈 Temperature Over Time")
+        plt.xticks(rotation=45)
+        plt.grid()
+
+        # 🔹 **2️⃣ Bar Chart - Wind Speed Over Time**
+        plt.subplot(1, 3, 2)
+        plt.bar(df["timestamp"], df["windspeed"], color="green")
+        plt.xlabel("Time")
+        plt.ylabel("Wind Speed (km/h)")
+        plt.title("🌬️ Wind Speed Over Time")
+        plt.xticks(rotation=45)
+        plt.grid(axis="y")
+
+        # 🔹 **3️⃣ Pie Chart - Weather Code Distribution**
+        plt.subplot(1, 3, 3)
+        weather_counts = df["weather_code"].value_counts()
+        labels = [f"Code {code}" for code in weather_counts.index]
+        plt.pie(weather_counts, labels=labels, autopct="%1.1f%%", colors=["red", "blue", "orange", "green"])
+        plt.title("☁️ Weather Condition Distribution")
+
+        # Show all charts in one window
+        plt.tight_layout()
+        plt.pause(5)  # Update every 5 seconds
+
+plt.show()
