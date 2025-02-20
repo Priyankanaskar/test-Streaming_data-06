@@ -42,17 +42,17 @@ def insert_weather_data(data):
         ''', (data['latitude'], data['longitude'], data['temperature'], data['windspeed'], data['weather_code'], data['timestamp']))
         conn.commit()
         conn.close()
-        print(f"Data stored successfully: {data}")
+        print(f"✅ Data stored successfully: {data}")
     except Exception as e:
-        print(f"Error inserting data: {e}")
+        print(f"❌ Error inserting data: {e}")
 
 # Consume Kafka Messages and Store in SQLite
 def consume_weather_data():
-    create_table()
-    print("Waiting for weather data from Kafka...")
+    create_table()  # Ensure the correct table exists
+    print("✅ Waiting for weather data from Kafka...")
     for message in consumer:
         weather_data = message.value
-        print(f"Received: {weather_data}")
+        print(f"📥 Received: {weather_data}")
         insert_weather_data(weather_data)
 
 if __name__ == '__main__':
