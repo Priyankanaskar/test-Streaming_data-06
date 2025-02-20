@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 
 DB_PATH = "sales_data.sqlite"
-API_URL = "https://fakestoreapi.com/carts?limit=5"  # Replace with real API endpoint
+API_URL = "https://www.instacart.com/store/target/storefront?ksadid=4572453&kskwid=1143375&msclkid=f1c6fda7fe311e8d71149a116bf5c254&utm_campaign=ad_demand_search_partner_target_exact_us_AUDACT&utm_content=accountid-47002375_campaignid-367844907_adgroupid-1218259347751930_device-c_adid-76141343049391_network-o&utm_medium=sem&utm_source=instacart_bing&utm_term=matchtype-e_keyword-target_targetid-kwd-76141551041481%3Aloc-190_locationid-49801"  # Replace with real API endpoint
 
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
