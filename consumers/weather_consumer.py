@@ -12,7 +12,7 @@ KAFKA_SERVER = "localhost:9092"
 DB_NAME = "weather_data.db"
 
 # Connect to SQLite and create table if not exists
-conn = sqlite3.connect(DB_NAME)
+conn = sqlite3.connect(DB_NAME, check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS weather (
@@ -29,57 +29,64 @@ consumer = KafkaConsumer(KAFKA_TOPIC, bootstrap_servers=KAFKA_SERVER, value_dese
 
 print("✅ Kafka Consumer Started. Listening for weather data...")
 
-for message in consumer:
-    data = message.value
+# Enable interactive mode for live updates
+plt.ion()
 
-    timestamp = data.get("timestamp")
-    temperature = data.get("temperature")
-    windspeed = data.get("windspeed")
-    weather_code = data.get("weather_code")
+while True:
+    for message in consumer:
+        data = message.value
 
-    # Store in SQLite
-    try:
-        cursor.execute("INSERT INTO weather (timestamp, temperature, windspeed, weather_code) VALUES (?, ?, ?, ?)",
-                       (timestamp, temperature, windspeed, weather_code))
-        conn.commit()
-        print(f"📩 Data Stored: {data}")
-    except Exception as e:
-        print(f"❌ Error inserting data: {e}")
+        timestamp = data.get("timestamp")
+        temperature = data.get("temperature")
+        windspeed = data.get("windspeed")
+        weather_code = data.get("weather_code")
 
-    # Fetch latest data for visualization
-    df = pd.read_sql_query("SELECT * FROM weather ORDER BY timestamp ASC", conn)
+        # Store in SQLite
+        try:
+            cursor.execute("INSERT INTO weather (timestamp, temperature, windspeed, weather_code) VALUES (?, ?, ?, ?)",
+                           (timestamp, temperature, windspeed, weather_code))
+            conn.commit()
+            print(f"📩 Data Stored: {data}")
+        except Exception as e:
+            print(f"❌ Error inserting data: {e}")
 
-    if not df.empty:
-        df["timestamp"] = pd.to_datetime(df["timestamp"])
+        # Fetch latest data for visualization
+        df = pd.read_sql_query("SELECT * FROM weather ORDER BY timestamp ASC", conn)
 
-        # 🔹 **1️⃣ Line Chart - Temperature Over Time**
-        plt.figure(figsize=(12, 6))
-        plt.subplot(1, 3, 1)  # (rows, cols, position)
-        plt.plot(df["timestamp"], df["temperature"], marker="o", linestyle="-", color="blue")
-        plt.xlabel("Time")
-        plt.ylabel("Temperature (°C)")
-        plt.title("📈 Temperature Over Time")
-        plt.xticks(rotation=45)
-        plt.grid()
+        if not df.empty:
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-        # 🔹 **2️⃣ Bar Chart - Wind Speed Over Time**
-        plt.subplot(1, 3, 2)
-        plt.bar(df["timestamp"], df["windspeed"], color="green")
-        plt.xlabel("Time")
-        plt.ylabel("Wind Speed (km/h)")
-        plt.title("🌬️ Wind Speed Over Time")
-        plt.xticks(rotation=45)
-        plt.grid(axis="y")
+            # Clear previous plots
+            plt.clf()
 
-        # 🔹 **3️⃣ Pie Chart - Weather Code Distribution**
-        plt.subplot(1, 3, 3)
-        weather_counts = df["weather_code"].value_counts()
-        labels = [f"Code {code}" for code in weather_counts.index]
-        plt.pie(weather_counts, labels=labels, autopct="%1.1f%%", colors=["red", "blue", "orange", "green"])
-        plt.title("☁️ Weather Condition Distribution")
+            # Create a figure with a 1x3 layout
+            fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+            fig.suptitle("📊 Live Weather Data Visualization")
 
-        # Show all charts in one window
-        plt.tight_layout()
-        plt.pause(5)  # Update every 5 seconds
+            # 🔹 **1️⃣ Line Chart - Temperature Over Time**
+            axes[0].plot(df["timestamp"], df["temperature"], marker="o", linestyle="-", color="blue")
+            axes[0].set_xlabel("Time")
+            axes[0].set_ylabel("Temperature (°C)")
+            axes[0].set_title("📈 Temperature Over Time")
+            axes[0].tick_params(axis="x", rotation=45)
+            axes[0].grid()
 
-plt.show()
+            # 🔹 **2️⃣ Bar Chart - Wind Speed Over Time**
+            axes[1].bar(df["timestamp"], df["windspeed"], color="green")
+            axes[1].set_xlabel("Time")
+            axes[1].set_ylabel("Wind Speed (km/h)")
+            axes[1].set_title("🌬️ Wind Speed Over Time")
+            axes[1].tick_params(axis="x", rotation=45)
+            axes[1].grid(axis="y")
+
+            # 🔹 **3️⃣ Pie Chart - Weather Code Distribution**
+            weather_counts = df["weather_code"].value_counts()
+            labels = [f"Code {code}" for code in weather_counts.index]
+            axes[2].pie(weather_counts, labels=labels, autopct="%1.1f%%", colors=["red", "blue", "orange", "green"])
+            axes[2].set_title("☁️ Weather Condition Distribution")
+
+            # Adjust layout and update the plot
+            plt.tight_layout()
+            plt.draw()
+            plt.pause(2)  # Refresh every 2 seconds
+
