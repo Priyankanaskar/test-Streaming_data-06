@@ -40,7 +40,7 @@ def produce_weather_data():
         if weather_data:
             producer.send("weather_data", value=weather_data)
             print(f"Sent to Kafka: {weather_data}")
-        time.sleep(60)  # Fetch every 60 seconds
+        time.sleep(30)  # Fetch every 60 seconds
 
 if __name__ == '__main__':
     produce_weather_data()
