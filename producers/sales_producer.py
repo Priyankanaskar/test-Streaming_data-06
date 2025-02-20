@@ -1,11 +1,11 @@
+# sales_producer.py
 import sqlite3
-import random
+import requests
 import time
 from datetime import datetime
 
 DB_PATH = "sales_data.sqlite"
-CATEGORIES = ["Electronics", "Clothing", "Home & Kitchen", "Toys", "Sports"]
-PAYMENT_METHODS = ["Credit Card", "PayPal", "Cryptocurrency", "Cash"]
+API_URL = "https://fakestoreapi.com/carts?limit=5"  # Replace with real API endpoint
 
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
@@ -21,23 +21,27 @@ cursor.execute('''
 ''')
 conn.commit()
 
-def generate_and_store_transaction():
-    transaction = {
-        "timestamp": datetime.utcnow().isoformat(),
-        "product_category": random.choice(CATEGORIES),
-        "payment_method": random.choice(PAYMENT_METHODS),
-        "price": round(random.uniform(5.0, 500.0), 2)
-    }
+def fetch_live_sales():
+    try:
+        response = requests.get(API_URL)
+        if response.status_code == 200:
+            sales_data = response.json()
+            for sale in sales_data:
+                timestamp = datetime.utcnow().isoformat()
+                product_category = sale.get("category", "Unknown")
+                payment_method = "Credit Card"  # Default, modify as needed
+                price = float(sale.get("price", 0))
 
-    cursor.execute('''
-        INSERT INTO sales_transactions (timestamp, product_category, payment_method, price)
-        VALUES (?, ?, ?, ?)
-    ''', (transaction["timestamp"], transaction["product_category"], transaction["payment_method"], transaction["price"]))
-    
-    conn.commit()
-    print(f"🛍️ New Sale Inserted: {transaction}")
+                cursor.execute('''
+                    INSERT INTO sales_transactions (timestamp, product_category, payment_method, price)
+                    VALUES (?, ?, ?, ?)
+                ''', (timestamp, product_category, payment_method, price))
+                conn.commit()
+                print(f"🛍️ New Sale Inserted: {timestamp}, {product_category}, {payment_method}, {price}")
+    except Exception as e:
+        print(f"Error fetching sales data: {e}")
 
 if __name__ == "__main__":
     while True:
-        generate_and_store_transaction()
-        time.sleep(2)
+        fetch_live_sales()
+        time.sleep(5)  # Fetch new data every 5 seconds
