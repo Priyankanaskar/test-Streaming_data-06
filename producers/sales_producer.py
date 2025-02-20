@@ -44,4 +44,4 @@ def fetch_live_sales():
 if __name__ == "__main__":
     while True:
         fetch_live_sales()
-        time.sleep(5)  # Fetch new data every 5 seconds
+        time.sleep(15)  # Fetch new data every 5 seconds

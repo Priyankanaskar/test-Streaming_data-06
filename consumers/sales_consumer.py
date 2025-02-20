@@ -47,5 +47,5 @@ def animate(i):
     plt.show()
 
 if __name__ == "__main__":
-    ani = FuncAnimation(plt.gcf(), animate, interval=5000)
+    ani = FuncAnimation(plt.gcf(), animate, interval=15000)
     plt.show()
