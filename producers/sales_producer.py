@@ -3,9 +3,13 @@ import sqlite3
 import requests
 import time
 from datetime import datetime
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from matplotlib.animation import FuncAnimation
 
 DB_PATH = "sales_data.sqlite"
-API_URL = "https://www.instacart.com/store/target/storefront?ksadid=4572453&kskwid=1143375&msclkid=f1c6fda7fe311e8d71149a116bf5c254&utm_campaign=ad_demand_search_partner_target_exact_us_AUDACT&utm_content=accountid-47002375_campaignid-367844907_adgroupid-1218259347751930_device-c_adid-76141343049391_network-o&utm_medium=sem&utm_source=instacart_bing&utm_term=matchtype-e_keyword-target_targetid-kwd-76141551041481%3Aloc-190_locationid-49801"  # Replace with real API endpoint
+API_URL = "https://api.sampleapis.com/fakestore/products"  # Replace with real API (Walmart, Amazon, etc.)
 
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
@@ -41,7 +45,34 @@ def fetch_live_sales():
     except Exception as e:
         print(f"Error fetching sales data: {e}")
 
+def animate(i):
+    df = pd.read_sql_query("SELECT * FROM sales_transactions", conn)
+    if df.empty:
+        print("⚠️ Not enough data for visualization.")
+        return
+
+    plt.clf()
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig.patch.set_facecolor('#f5f5f5')  # Set background color
+    
+    df_bar = df.groupby("product_category").size().reset_index(name="sales_count")
+    sns.barplot(x="product_category", y="sales_count", data=df_bar, palette="viridis", ax=axes[0])
+    axes[0].set_title("Sales Count by Product Category", backgroundcolor='#f0f0f0')
+    axes[0].tick_params(axis='x', rotation=45)
+    
+    axes[1].pie(df_bar["sales_count"], labels=df_bar["product_category"], autopct='%1.1f%%', colors=sns.color_palette("pastel"))
+    axes[1].set_title("Sales Proportion by Product Category", backgroundcolor='#f0f0f0')
+    
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df_line = df.set_index("timestamp").resample("1T").size()
+    df_line.plot(ax=axes[2], marker='o', linestyle='-')
+    axes[2].set_title("Sales Trend Over Time", backgroundcolor='#f0f0f0')
+    
+    plt.tight_layout()
+    plt.show()
+
 if __name__ == "__main__":
+    ani = FuncAnimation(plt.gcf(), animate, interval=10000)
     while True:
         fetch_live_sales()
-        time.sleep(15)  # Fetch new data every 5 seconds
+        time.sleep(5)

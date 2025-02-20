@@ -70,7 +70,10 @@ Once the consumer script runs successfully, it will display **three charts**:
 2. **Bar Chart:** Number of transactions per category
 3. **Pie Chart:** Proportion of sales across categories
 
-![alt text](<Screenshot 2025-02-17 112106 sales triple.png>)
+![alt text]](C:\Users\priya\test-Streaming_data-06\charts.png)
 
 
 
+
+
+[def]: charts.png>
